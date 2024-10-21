@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="G:\chat_app\static\styles.css">
+</head>
+<body>
+
+    <header class="hero">
+        <div class="container">
+            <h1>Chat App</h1>
+            <p>Connect and chat with the AI!</p>
+        </div>
+    </header>
+
+    <main class="container my-5">
+        <div id="chat-box" class="border rounded p-3 mb-3" style="height: 400px; overflow-y: scroll;">
+            <!-- Chat messages will be displayed here -->
+        </div>
+        <div class="input-group">
+            <input type="text" id="message-input" class="form-control" placeholder="Type your message here..." aria-label="Message">
+            <div class="input-group-append">
+                <button class="btn btn-primary" id="send-button">Send</button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Chat App. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // JavaScript to handle sending messages
+        document.getElementById('send-button').addEventListener('click', function() {
+            const messageInput = document.getElementById('message-input');
+            const message = messageInput.value;
+
+            if (message) {
+                const chatBox = document.getElementById('chat-box');
+                const userMessageElement = document.createElement('div');
+                userMessageElement.textContent = "You: " + message;
+                chatBox.appendChild(userMessageElement);
+
+                // Send the message to the Flask backend
+                fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: message })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const aiMessageElement = document.createElement('div');
+                    if (data.response) {
+                        aiMessageElement.textContent = "AI: " + data.response;
+                    } else {
+                        aiMessageElement.textContent = "Error: " + data.error;
+                    }
+                    chatBox.appendChild(aiMessageElement);
+                    chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+
+                messageInput.value = ''; // Clear the input
+            }
+        });
+    </script>
+</body>
+</html>
